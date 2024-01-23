@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include('../partials/head', { title }) %>
+  </head>
+  <body>
+    <header>
+      <%- include('../partials/header') %>
+    </header>
+    <main>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mx-4">
+        <% courses.forEach(function(course) { %>
+            <%- include('../partials/classroom_box', { course }) %>
+        <% }); %>
+      </div>
+    </main>
+  </body>
+</html>
