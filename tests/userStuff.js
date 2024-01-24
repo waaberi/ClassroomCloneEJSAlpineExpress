@@ -1,20 +1,16 @@
 const mongoose = require("mongoose");
 const User = require("../models/user");
+const fetchFurther = require("../utils/fetchFurther");
 require("dotenv").config();
 
 mongoose.connect(process.env.DB_LINK || process.env.DB_LINK_DEV);
 
 mongoose.connection.on("connected", async () => {
     try {
-        const newUser = await User.create({
-            firstName: "John",
-            lastName: "Doe",
-            email: "testemail1234@gmail.com",
-            password: "fdgdfdfsdfsdfsd",
-            role: "student1",
-        });
-
-        console.log(newUser);
+        // get list of all IDs in User
+        let users = await User.find().select("_id");
+        let results = await fetchFurther("User", users.map((user) => user._id), ["firstName", "lastName", "email"]);
+        console.log(results);
     } catch (error) {
         if (error instanceof mongoose.Error.ValidationError) {
             console.log(error.errors[Object.keys(error.errors)[0]].message);

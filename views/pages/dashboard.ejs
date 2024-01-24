@@ -1,1 +1,77 @@
-<!-- Only accessible for admins -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <%- include('../partials/head', { title: "Dashboard" }) %>
+    </head>
+    <body class="bg-gray-100">
+        <header>
+            <%- include('../partials/header') %>
+        </header>
+        <main class="flex justify-center py-10">
+            <div class="bg-white rounded-lg shadow-md p-6 w-full max-w-md" x-data="app()" x-init='init()'>
+                <div class="flex items-center justify-center">
+                    <img :src="'data:image/jpeg;base64,' + userdata.avatar" alt="Profile Picture" class="w-24 h-24 rounded-full border-2 border-gray-200">
+                </div>
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <h2 class="text-gray-500">Name</h2>
+                        <div class="flex space-x-2" x-show="editmode.name" @focusout="setTimeout(() => { if (document.activeElement.id !== 'firstName' && document.activeElement.id !== 'lastName') editmode.name = false; }, 0)">
+                            <input @input="checkChange()" id="firstName" type="text" x-model="userdata.firstName" @keydown.enter="editmode.name = false" @click.stop class="border rounded px-2 py-1 w-full max-w-[calc(50%-0.5rem)]">
+                            <input @input="checkChange()" id="lastName" type="text" x-model="userdata.lastName" @keydown.enter="editmode.name = false" @click.stop class="border rounded px-2 py-1 w-full max-w-[calc(50%-0.5rem)]">
+                        </div>
+                        <p class="text-lg font-semibold" x-text="userdata.firstName + ' ' + userdata.lastName" @click="editmode.name = true" x-show="!editmode.name"></p>
+                    </div>
+                    <div>
+                        <h2 class="text-gray-500">Email</h2>
+                        <p class="text-lg" x-text="userdata.email" @click="editmode.email = true" x-show="!editmode.email"></p>
+                        <input @input="checkChange()" id="email" type="email" x-show="editmode.email" x-model="userdata.email" class="border rounded px-2 py-1">
+                        <p id="error" x-show="errorMessage != ''" x-text="errorMessage" class="text-red-500"></p>
+                    </div>
+                    <div>
+                        <h2 class="text-gray-500">Role</h2>
+                        <p class="text-lg" x-text="userdata.role"></p>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-between">
+                    <button :class="{ 'bg-red-500': errorMessage != '', 'bg-gray-500': !changed, 'bg-green-500': changed && errorMessage == '' }" class="text-white rounded px-4 py-2" @click="if (changed) update()">
+                        Save Changes
+                    </button>
+                    <script>
+                        function app() {
+                            return {
+                                userdata: [],
+                                originalUserdata: [],
+                                editmode: {name: false, email: false},
+                                errorMessage: '',
+                                changed: false,
+                                checkChange: function() {
+                                    console.log(this.userdata);
+                                    this.changed = JSON.stringify(this.userdata) !== JSON.stringify(this.originalUserdata);
+                                    if (!this.validateEmail(this.userdata.email)) this.errorMessage = 'Invalid email address';
+                                    else this.errorMessage = '';
+                                },
+                                init: async function() {
+                                    this.userdata = await ((await fetch("/dashboard/info")).json());
+                                    this.originalUserdata = JSON.parse(JSON.stringify(this.userdata));
+                                },
+                                validateEmail: function(email) {
+                                    let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                                    return re.test(email);
+                                },
+                                update: function() {
+                                    console.log("I was called");
+                                    if (this.errorMessage == '') {
+                                        fetch('/dashboard/update', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.userdata)}).then(() => { this.editmode = {name: false, email: false, role: false}; this.changed = false; })
+                                    }
+                                }
+                            }
+                        }
+                    </script>
+                    <button class="bg-red-500 text-white rounded px-4 py-2" @click="if (confirm('Are you sure you want to delete your account?')) { fetch('/dashboard/delete', { method: 'DELETE' }).then(() => { window.location.href = '/auth'; }); }">
+                        Delete Account
+                    </button>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>

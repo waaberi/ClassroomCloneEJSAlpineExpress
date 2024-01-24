@@ -11,13 +11,6 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        validate: {
-            validator: function(value) {
-                const linkRegex = /^(http|https):\/\/[^ "]+$/;
-                return linkRegex.test(value);
-            },
-            message: "Invalid link format",
-        },
     },
     email: {
         type: String,

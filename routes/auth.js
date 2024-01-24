@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require('multer');
 const router = express.Router();
 const User = require("../models/user");
 const mongoose = require("mongoose");
@@ -6,12 +7,15 @@ const jwt = require("jsonwebtoken");
 const passwords = require("../utils/passwords");
 const { ClientNoAuth } = require("../middleware/auth");
 
+const upload = multer({ storage: multer.memoryStorage() });
+
 // Authentication page
 router.get("/", ClientNoAuth, (req, res) => res.render("auth"));
 
 // Login route
-router.post("/signin", async (req, res) => {
+router.post("/signin", upload.none(), async (req, res) => {
     let body = req.body;
+    console.log(req.body)
 
     let user = await User.findOne({ email: body.email });
     if (!user) return res.status(404).json({ message: "User doesn't exist!" });
@@ -35,9 +39,17 @@ router.post("/signin", async (req, res) => {
 });
 
 // Signup route
-router.post("/signup", async (req, res) => {
+router.post("/signup", upload.single('profilePicture'), async (req, res) => {
     let body = req.body;
     console.log(req.body);
+    
+    let profilePicture;
+    if (req.file) {
+        console.log("File uploaded!");
+        profilePicture = req.file.buffer.toString('base64');
+    } else {
+        console.log('No file uploaded');
+    }
 
     try {
         let pswd = await passwords.hash(body.password);
@@ -48,6 +60,7 @@ router.post("/signup", async (req, res) => {
             email: body.email,
             password: pswd,
             role: body.role,
+            avatar: profilePicture,
         });
 
         console.log(user);

@@ -3,12 +3,12 @@
     <head>
         <%- include('../partials/head', { title: "Authentication Page" }) %>
     </head>
-    <body x-data="{ isSignin: false, message: '', error: false }" class="bg-gray-100">
+    <body x-data="{ isSignin: false, message: '', error: false, isDragging: false, dropMessage: 'Drag and drop an image or click to select', file: 'empty' }" :class="{ 'bg-blue-100': isDragging, 'bg-gray-100': !isDragging }">
         <div class="flex items-center justify-center min-h-screen">
-            <div class="bg-white shadow-md rounded px-8 py-6">
+            <div class="bg-white shadow-md rounded px-8 py-6 overflow-auto" style="width: 30rem;">
                 <h2 class="text-2xl font-bold mb-4" x-text="isSignin ? 'Sign In' : 'Sign Up'">Authentication</h2>
                 <div x-show="isSignin">
-                    <form id="signinContainer" x-on:submit.prevent="submitForm">
+                    <form id="signinContainer" x-on:submit.prevent="submitForm" enctype="multipart/form-data">
                         <div class="mb-4">
                             <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
                             <input type="email" id="email" name="email" required class="border rounded px-3 py-2 w-full">
@@ -21,7 +21,7 @@
                     </form>
                 </div>
                 <div x-show="!isSignin">
-                    <form id="signupContainer" x-on:submit.prevent="submitForm">
+                    <form id="signupContainer" x-on:submit.prevent="submitForm" enctype="multipart/form-data">
                         <div class="mb-4">
                             <label for="firstname" class="block text-gray-700 text-sm font-bold mb-2">First Name:</label>
                             <input type="text" id="firstName" name="firstName" required class="border rounded px-3 py-2 w-full">
@@ -45,6 +45,18 @@
                                 <option value="teacher">Teacher</option>
                             </select>
                         </div>
+                        <div class="mb-4">
+                            <label for="profilePicture" class="block text-gray-700 text-sm font-bold mb-2">Profile Picture:</label>
+                            <div class="relative border rounded px-3 py-2 w-full" @dragover="handleDragOver" @dragleave="handleDragLeave" @drop="handleDrop">
+                                <input type="file" id="profilePicture" name="profilePicture" accept="image/*" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" @change="fileThere = true">
+                                <div class="flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    <span class="ml-2 text-gray-700" x-text="dropMessage"></span>
+                                </div>
+                            </div>
+                        </div>
                         <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Sign Up</button>
                     </form>
                 </div>
@@ -54,26 +66,49 @@
                 </p>
                 <p id="message" x-text="message" x-bind:class="{ 'text-red-500': error, 'text-green-500': !error }" class="text-center font-bold mt-2"></p>
                 <script>
+                    function app() {
+                        return {
+                            handleDragOver(e) {
+                                e.preventDefault();
+                                this.isDragging = true;
+                                this.dropMessage = 'Dropping...';
+                            },
+                            handleDragLeave() {
+                                this.isDragging = false;
+                                this.dropMessage = 'Drag and drop an image or click to select';
+                            },
+                            handleDrop(e) {
+                                e.preventDefault();
+                                this.isDragging = false;
+                                this.file = e.dataTransfer.files[0];
+                                this.dropMessage = 'File dropped successfully!';
+                            },
+                        }
+                    }
+
+                    const { handleDragLeave, handleDragOver, handleDrop } = app();
+
                     async function submitForm() {
-                        const formData = new FormData(document.querySelector(this.isSignin ? '#signinContainer' : '#signupContainer'));
-
-                        // Convert FormData to JSON
-                        let jsonObject = {};
-                        for (const [key, value] of formData.entries()) jsonObject[key] = value;
-
+                        const form = document.querySelector(this.isSignin ? '#signinContainer' : '#signupContainer');
+                        const formData = new FormData(form);
+                        if (this.file) formData.append('profilePicture', this.file);
                         try {
-                            const response = await axios({
-                                method: 'post',
-                                url: `/auth/${this.isSignin ? 'signin' : 'signup'}`,
-                                data: jsonObject,
-                                headers: { 'Content-Type': 'application/json' },
+                            const response = await fetch(`/auth/${this.isSignin ? 'signin' : 'signup'}`, {
+                                method: 'POST',
+                                body: formData
                             });
-                            this.error = false;
-                            this.message = response.data.message;
-                            setTimeout(() => window.location.href = "/", 500);
+
+                            if (response.ok) {
+                                this.error = false;
+                                this.message = (await response.json()).message;
+                                setTimeout(() => window.location.href = "/", 500);
+                            } else {
+                                this.error = true;
+                                this.message = (await response.json()).message;
+                            }
                         } catch (error) {
                             this.error = true;
-                            this.message = error.response.data.message;
+                            this.message = error.message;
                         }
                     }
                 </script>
