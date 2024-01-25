@@ -1,35 +1,35 @@
-const createError = require('http-errors');
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 const { createClient } = require("@libsql/client");
 const users_model = require("./models_sql/users");
 require("dotenv").config();
 const app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 let config;
 
 if (process.env.NODE_ENV === "development") {
-  console.log("Development environment!")
+  console.log("Development environment!");
   config = {
     url: process.env.DB_LINK_DEV,
   };
 } else {
-  console.log("Production environment!")
+  console.log("Production environment!");
   config = {
     url: process.env.DB_LINK_PROD,
-    authToken: process.env.DB_PROD_KEY
+    authToken: process.env.DB_PROD_KEY,
   };
 }
 
@@ -39,31 +39,37 @@ const user_table = new users_model(new_db);
 
 user_table.migrate();
 
-app.use(function (req, res, next) { // sqlite3
-  req.db = { user_table }
+app.use(function (req, res, next) {
+  // sqlite3
+  req.db = { user_table };
   next();
 });
 
-app.use('/auth', require('./routes/auth'));
-app.use('/', require('./routes/index'));
-app.use('/dashboard', require('./routes/dashboard'));
+app.use("/auth", require("./routes/auth"));
+app.use("/", require("./routes/index"));
+app.use("/dashboard", require("./routes/dashboard"));
+
+app.get("/uptimerobot", (req, res) => {
+  console.log("received!");
+  res.send("Received!");
+});
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   if (process.env.NODE_ENV === "development") {
     res.locals.message = err.message;
-    res.locals.error = req.app.get('env') === 'development' ? err : {};
-  
+    res.locals.error = req.app.get("env") === "development" ? err : {};
+
     // render the error page
     res.status(err.status || 500);
-    res.render('error');
-  } else res.status(err.status).render('404');
+    res.render("error");
+  } else res.status(err.status).render("404");
 });
 
 app.listen(process.env.PORT || 3000, () => {
