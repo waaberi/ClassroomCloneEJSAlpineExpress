@@ -59,9 +59,8 @@
                                     return re.test(email);
                                 },
                                 update: function() {
-                                    console.log("I was called");
                                     if (this.errorMessage == '') {
-                                        fetch('/dashboard/update', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.userdata)}).then(() => { this.editmode = {name: false, email: false, role: false}; this.changed = false; })
+                                        fetch('/dashboard/update', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({email: this.userdata.email, firstName: this.userdata.firstName, lastName: this.userdata.lastName})}).then(() => { this.editmode = {name: false, email: false, role: false}; this.changed = false; })
                                     }
                                 }
                             }

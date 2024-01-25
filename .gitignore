@@ -1,2 +1,5 @@
 .env
 node_modules
+test.db
+vieux_modeles
+.go-tetris.log

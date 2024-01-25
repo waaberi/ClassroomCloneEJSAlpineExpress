@@ -1,40 +1,50 @@
 const express = require('express');
 const router = express.Router();
 const { APIAuth, ClientAuth } = require('../middleware/auth');
-const User = require("../models/user");
-const fetchFurther = require("../utils/fetchFurther");
 
 router.get("/info", APIAuth, async (req, res) => {
-  const user = await User.findById(req.user_id);
-  console.log(user.profilePicture);
-  return res.status(200).json({
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    avatar: user.avatar,
-    role: user.role,
-    courses: (await fetchFurther("Course", user.courses, ["code", "name", "description"])),
-  });
+  try {
+    const user = await req.db.user_table.findOne("email", req.user_email);
+    if (!user) {
+      return res.status(404).json({ message: "User doesn't exist!" });
+    }
+    return res.status(200).json({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "An unexpected error occured!" });
+  }
 });
 
 router.delete("/delete", APIAuth, async (req, res) => {
-  const user = await User.findByIdAndDelete(req.user_id);
-  res.clearCookie("token");
-  return res.status(200).json({
-      message: "User deleted successfully!",
-  });
+  try {
+    await req.db.user_table.deleteOne("email", req.user_email);
+    res.clearCookie("token");
+    return res.status(200).json({
+        message: "User deleted successfully!",
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "An unexpected error occured!" });
+  }
 });
 
 router.put("/update", APIAuth, async (req, res) => {
-  console.log(req.body);
-  const user = await User.findById(req.user_id);
-  user.firstName = req.body.firstName;
-  user.lastName = req.body.lastName;
-  user.email = req.body.email;
+  try {
+    await req.db.user_table.updateOne({
+      email: req.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+    }, "email", req.user_email);
 
-  await user.save();
-  console.log(user);
-  res.send("User updated successfully!");
+    res.send("User updated successfully!");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while updating the user.");
+  }
 });
 
 router.get('/', ClientAuth, (req, res) => {

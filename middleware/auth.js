@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 module.exports = {
     APIAuth: function (req, res, next) {
         try {
-            const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET || process.env.JWT_SECRET_DEV);
-            req.user_id = decoded.user_id;
+            const decoded = jwt.verify(req.cookies.token, process.env.NODE_ENV == "production" ? process.env.JWT_SECRET_PROD : process.env.JWT_SECRET_DEV);
+            req.user_email = decoded.user_email;
             next();
         } catch (error) {
             console.error(error);
@@ -13,8 +13,8 @@ module.exports = {
     },
     ClientAuth: function (req, res, next) {
         try {
-            const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET || process.env.JWT_SECRET_DEV);
-            req.user_id = decoded.user_id;
+            const decoded = jwt.verify(req.cookies.token, process.env.NODE_ENV == "production" ? process.env.JWT_SECRET_PROD : process.env.JWT_SECRET_DEV);
+            req.user_email = decoded.user_email;
             next();
         } catch (error) {
             console.error(error)
@@ -23,7 +23,7 @@ module.exports = {
     },
     ClientNoAuth: function (req, res, next) {
         try {
-            const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET || process.env.JWT_SECRET_DEV);
+            const decoded = jwt.verify(req.cookies.token, process.env.NODE_ENV == "production" ? process.env.JWT_SECRET_PROD : process.env.JWT_SECRET_DEV);
             res.redirect("/");
         } catch (error) {
             if (req.cookies.token) res.clearCookie("token");

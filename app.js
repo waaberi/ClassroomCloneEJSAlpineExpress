@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const { createClient } = require("@libsql/client");
+const users_model = require("./models_sql/users");
 require("dotenv").config();
 const app = express();
 
@@ -15,6 +17,32 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+let config;
+
+if (process.env.NODE_ENV === "development") {
+  console.log("Development environment!")
+  config = {
+    url: process.env.DB_LINK_DEV,
+  };
+} else {
+  console.log("Production environment!")
+  config = {
+    url: process.env.DB_LINK_PROD,
+    authToken: process.env.DB_PROD_KEY
+  };
+}
+
+const new_db = createClient(config);
+
+const user_table = new users_model(new_db);
+
+user_table.migrate();
+
+app.use(function (req, res, next) { // sqlite3
+  req.db = { user_table }
+  next();
+});
 
 app.use('/auth', require('./routes/auth'));
 app.use('/', require('./routes/index'));
@@ -35,9 +63,9 @@ app.use(function(err, req, res, next) {
     // render the error page
     res.status(err.status || 500);
     res.render('error');
-  }
-
-  res.render('404');
+  } else res.render('404');
 });
 
-module.exports = app;
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server started on port ${process.env.PORT || 3000}`);
+});
