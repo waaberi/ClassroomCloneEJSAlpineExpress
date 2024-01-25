@@ -72,15 +72,18 @@
                 <script>
                     function app() {
                         return {
+                            // Gère l'événement de survol par un élément glissé
                             handleDragOver(e) {
                                 e.preventDefault();
                                 this.isDragging = true;
                                 this.dropMessage = 'Dropping...';
                             },
+                            // Gère l'événement de sortie d'un élément glissé
                             handleDragLeave() {
                                 this.isDragging = false;
                                 this.dropMessage = 'Drag and drop an image or click to select';
                             },
+                            // Gère l'événement de dépôt d'un élément
                             handleDrop(e) {
                                 e.preventDefault();
                                 this.isDragging = false;
@@ -90,28 +93,39 @@
                         }
                     }
 
+                    // Destructure les méthodes de l'objet retourné par la fonction app
                     const { handleDragLeave, handleDragOver, handleDrop } = app();
 
+                    // Fonction asynchrone pour soumettre le formulaire
                     async function submitForm() {
+                        // Sélectionne le formulaire approprié en fonction du mode (inscription ou connexion)
                         const form = document.querySelector(this.isSignin ? '#signinContainer' : '#signupContainer');
+                        // Crée un nouvel objet FormData à partir du formulaire
                         const formData = new FormData(form);
+                        // Si un fichier a été déposé, l'ajoute à l'objet FormData
                         if (this.file) formData.append('profilePicture', this.file);
                         try {
+                            // Envoie une requête POST au serveur avec les données du formulaire
                             const response = await fetch(`/auth/${this.isSignin ? 'signin' : 'signup'}`, {
                                 method: 'POST',
                                 body: formData
                             });
 
+                            // Si la réponse est OK, met à jour l'état de l'application
                             if (response.ok) {
                                 this.error = false;
                                 this.message = (await response.json()).message;
+                                // Si l'utilisateur est en train de se connecter, le redirige vers la page d'accueil
                                 if (this.isSignin) setTimeout(() => window.location.href = "/", 500);
+                                // Sinon, passe en mode connexion
                                 else this.isSignin = true;
                             } else {
+                                // Si la réponse n'est pas OK, affiche un message d'erreur
                                 this.error = true;
                                 this.message = (await response.json()).message;
                             }
                         } catch (error) {
+                            // En cas d'erreur lors de l'envoi de la requête, affiche un message d'erreur
                             this.error = true;
                             this.message = error.message;
                         }

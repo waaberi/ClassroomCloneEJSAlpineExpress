@@ -50,27 +50,45 @@
                     <script>
                         function app() {
                             return {
+                                // Données de l'utilisateur
                                 userdata: [],
+                                // Copie originale des données de l'utilisateur
                                 originalUserdata: [],
+                                // Indique si les champs sont en mode édition
                                 editmode: {name: false, email: false},
+                                // Message d'erreur à afficher
                                 errorMessage: '',
+                                // Indique si les données ont changé
                                 changed: false,
+                                // Vérifie si les données ont changé
                                 checkChange: function() {
+                                    // Log les données de l'utilisateur
                                     console.log(this.userdata);
+                                    // Vérifie si les données ont changé
                                     this.changed = JSON.stringify(this.userdata) !== JSON.stringify(this.originalUserdata);
-                                    if (!this.validateEmail(this.userdata.email)) this.errorMessage = 'Invalid email address';
+                                    // Vérifie si l'email est valide
+                                    if (!this.validateEmail(this.userdata.email)) this.errorMessage = 'Adresse e-mail invalide';
                                     else this.errorMessage = '';
                                 },
+                                // Initialise les données de l'utilisateur
                                 init: async function() {
+                                    // Récupère les données de l'utilisateur
                                     this.userdata = await ((await fetch("/dashboard/info")).json());
+                                    // Copie les données de l'utilisateur
                                     this.originalUserdata = JSON.parse(JSON.stringify(this.userdata));
                                 },
+                                // Valide une adresse e-mail
                                 validateEmail: function(email) {
+                                    // Expression régulière pour valider une adresse e-mail
                                     let re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                                    // Teste l'adresse e-mail
                                     return re.test(email);
                                 },
+                                // Met à jour les données de l'utilisateur
                                 update: function() {
+                                    // Si il n'y a pas d'erreur
                                     if (this.errorMessage == '') {
+                                        // Envoie une requête pour mettre à jour les données
                                         fetch('/dashboard/update', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({email: this.userdata.email, firstName: this.userdata.firstName, lastName: this.userdata.lastName})}).then(() => { this.editmode = {name: false, email: false, role: false}; this.changed = false; })
                                     }
                                 }
