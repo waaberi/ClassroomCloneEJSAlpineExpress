@@ -35,11 +35,11 @@ router.delete("/delete", APIAuth, async (req, res) => {
     res.clearCookie("token");
     // Retourne un message de succès
     return res.status(200).json({
-        message: "Utilisateur supprimé avec succès!",
+        message: "User updated with success!",
     });
   } catch (err) {
     // En cas d'erreur, retourne une erreur 500
-    return res.status(500).json({ message: "Une erreur inattendue s'est produite!" });
+    return res.status(500).json({ message: "An unexpected error occured." });
   }
 });
 
@@ -54,11 +54,11 @@ router.put("/update", APIAuth, async (req, res) => {
     }, "email", req.user_email);
 
     // Retourne un message de succès
-    res.send("Utilisateur mis à jour avec succès!");
+    res.send("User updated with success!");
   } catch (err) {
     // En cas d'erreur, affiche l'erreur et retourne une erreur 500
     console.error(err);
-    res.status(500).send("Une erreur s'est produite lors de la mise à jour de l'utilisateur.");
+    res.status(500).send("An unexpected error occured.");
   }
 });
 
