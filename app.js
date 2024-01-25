@@ -9,7 +9,7 @@ require("dotenv").config();
 const app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views/pages'));
+app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
@@ -63,7 +63,7 @@ app.use(function(err, req, res, next) {
     // render the error page
     res.status(err.status || 500);
     res.render('error');
-  } else res.render('404');
+  } else res.status(err.status).render('404');
 });
 
 app.listen(process.env.PORT || 3000, () => {
