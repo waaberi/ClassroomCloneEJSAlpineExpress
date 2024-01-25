@@ -2,8 +2,8 @@ const express = require("express");
 const multer = require('multer');
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const passwords = require("../utils/passwords");
 const { ClientNoAuth } = require("../middleware/auth");
+const bcrypt = require('bcrypt');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -20,7 +20,7 @@ router.post("/signin", upload.none(), async (req, res) => {
             return res.status(404).json({ message: "User doesn't exist!" });
         }
 
-        const isMatch = await passwords.compare(body.password, user.password);
+        const isMatch = await bcrypt.compare(body.password, user.password);
         if (!isMatch) return res.status(403).json({ message: "Incorrect password!" });
 
         let token = jwt.sign(
@@ -62,7 +62,7 @@ router.post("/signup", upload.single('profilePicture'), async (req, res) => {
     }
 
     try {
-        let pswd = await passwords.hash(body.password);
+        let pswd = await bcrypt.hash(body.password, 10);
 
         let data = {
             firstName: body.firstName,
