@@ -78,7 +78,7 @@ app.use(function (err, req, res, next) {
     // Rendu de la page d'erreur
     res.status(err.status || 500);
     res.render("error");
-  } else res.status(err.status).render("404");
+  } else res.status(err.status || 500).render("404");
 });
 
 // Démarrage du serveur
