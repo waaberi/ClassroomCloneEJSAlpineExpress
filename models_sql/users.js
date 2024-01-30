@@ -10,15 +10,13 @@ module.exports = class Users {
         // Exécution de la requête SQL pour créer la table des utilisateurs si elle n'existe pas déjà
         await this.db.execute(`
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             firstName TEXT NOT NULL,
             lastName TEXT NOT NULL,
             avatar TEXT,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
-            role TEXT DEFAULT 'student' CHECK(role IN ('student', 'teacher', 'admin')),
-            courses TEXT,
-            managedCourses TEXT
+            role TEXT DEFAULT 'student' CHECK(role IN ('student', 'teacher', 'admin'))
         )
         `)
         // Affichage d'un message dans la console pour indiquer que la table des utilisateurs a été migrée

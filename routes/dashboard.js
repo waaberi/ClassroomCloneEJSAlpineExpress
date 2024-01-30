@@ -7,7 +7,7 @@ const { APIAuth, ClientAuth } = require('../middleware/auth');
 router.get("/info", APIAuth, async (req, res) => {
   try {
     // Recherche de l'utilisateur par email
-    const user = await req.db.user_table.findOne("email", req.user_email);
+    const user = await req.db.user_table.findOne("id", req.user_id);
     // Si l'utilisateur n'existe pas, retourne une erreur 404
     if (!user) {
       return res.status(404).json({ message: "L'utilisateur n'existe pas!" });
@@ -30,7 +30,7 @@ router.get("/info", APIAuth, async (req, res) => {
 router.delete("/delete", APIAuth, async (req, res) => {
   try {
     // Supprime l'utilisateur par email
-    await req.db.user_table.deleteOne("email", req.user_email);
+    await req.db.user_table.deleteOne("id", req.user_id);
     // Supprime le cookie "token"
     res.clearCookie("token");
     // Retourne un message de succès
@@ -51,7 +51,7 @@ router.put("/update", APIAuth, async (req, res) => {
       email: req.body.email,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-    }, "email", req.user_email);
+    }, "id", req.user_id);
 
     // Retourne un message de succès
     res.send("User updated with success!");

@@ -31,7 +31,7 @@ router.post("/signin", upload.none(), async (req, res) => {
 
         // Génération du token JWT
         let token = jwt.sign(
-            { user_email: user.email },
+            { user_id: user.id },
             process.env.NODE_ENV == "production" ? process.env.JWT_SECRET_PROD : process.env.JWT_SECRET_DEV
         );
     

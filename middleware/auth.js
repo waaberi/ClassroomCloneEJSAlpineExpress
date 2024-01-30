@@ -7,7 +7,7 @@ module.exports = {
             // Vérifie le token JWT et décode les informations de l'utilisateur
             const decoded = jwt.verify(req.cookies.token, process.env.NODE_ENV == "production" ? process.env.JWT_SECRET_PROD : process.env.JWT_SECRET_DEV);
             // Stocke l'email de l'utilisateur dans la requête
-            req.user_email = decoded.user_email;
+            req.user_id = decoded.user_id;
             // Passe au prochain middleware
             next();
         } catch (error) {
@@ -22,7 +22,7 @@ module.exports = {
             // Vérifie le token JWT et décode les informations de l'utilisateur
             const decoded = jwt.verify(req.cookies.token, process.env.NODE_ENV == "production" ? process.env.JWT_SECRET_PROD : process.env.JWT_SECRET_DEV);
             // Stocke l'email de l'utilisateur dans la requête
-            req.user_email = decoded.user_email;
+            req.user_id = decoded.user_id;
             // Passe au prochain middleware
             next();
         } catch (error) {
