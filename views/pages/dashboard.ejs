@@ -1,22 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard</title>
-        <script src="/js/alpine.min.js" defer></script>
-        <script src="/js/tailwind.min.js"></script>
+        <%- include('../partials/head', { title: 'Dashboard' }) %>
     </head>
     <body class="bg-gray-100">
         <header>
-            <ul class="flex items-center justify-between bg-blue-500 p-4">
-                <li class="text-white text-lg font-bold" onclick="window.location.href='/'">Classroom Clone</li>
-                <li class="flex justify-end space-x-4">
-                    <a href="/settings" class="text-white hover:text-gray-200">Settings</a>
-                    <a href="/dashboard" class="text-white hover:text-gray-200">Dashboard</a>
-                    <a href onclick='document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";' class="text-white hover:text-gray-200">Sign Out</a>
-                </li>
-            </ul>
+            <%- include('../partials/header') %>
         </header>
         <main class="flex justify-center py-10">
             <div class="bg-white rounded-lg shadow-md p-6 w-full max-w-md" x-data="app()" x-init='init()'>
@@ -62,8 +51,6 @@
                                 changed: false,
                                 // Vérifie si les données ont changé
                                 checkChange: function() {
-                                    // Log les données de l'utilisateur
-                                    console.log(this.userdata);
                                     // Vérifie si les données ont changé
                                     this.changed = JSON.stringify(this.userdata) !== JSON.stringify(this.originalUserdata);
                                     // Vérifie si l'email est valide

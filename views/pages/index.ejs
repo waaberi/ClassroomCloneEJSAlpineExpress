@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include('../partials/head', { title: 'Home Page' }) %>
+  </head>
+  <body class="bg-gray-100">
+    <header>
+        <%- include('../partials/header') %>
+    </header>
+    <script> // To debug better
+      function hook(name, vari) {
+        console.log(name, vari);
+        return vari.length === 0;
+      }
+    </script>
+    <main class="container mx-auto px-4 py-8">
+      <div x-data='{
+          open: false,
+          tab: "join",
+          isStudent: true
+        }' @keydown.escape.window="open = false">
+        <button @click="open = true" class="px-4 py-2 bg-blue-500 text-white font-bold rounded">Join/Create Course</button>
+        <div x-show="open" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title" x-text="tab === 'join' ? 'Join Classroom' : 'Create Classroom'"></h3>
+                            <div class="mt-3 sm:mt-0 sm:ml-auto">
+                                <button @click="tab = 'join'" :class="{ 'text-indigo-600': tab === 'join' }" class="px-4 py-2 font-bold">Join</button>
+                                <button @click="tab = 'create'" :class="{ 'text-indigo-600': tab === 'create' }" class="px-4 py-2 font-bold">Create</button>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <!-- Join form -->
+                            <form x-show="tab === 'join'" action="/join-course" method="POST" class="flex flex-col">
+                                <input type="text" name="courseCode" placeholder="Course Code" class="w-full px-3 py-2 placeholder-gray-500 border rounded-md">
+                                <div class="flex justify-between mt-2">
+                                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white font-bold rounded">Join</button>
+                                    <button type="button" class="px-4 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="open = false">
+                                        Close
+                                    </button>
+                                </div>
+                            </form>
+    
+                            <!-- Create form -->
+                            <form x-show="tab === 'create'" action="/create-course" method="POST" class="flex flex-col">
+                                <input type="text" name="code" placeholder="Course Code" class="w-full px-3 py-2 placeholder-gray-500 border rounded-md">
+                                <input type="text" name="title" placeholder="Course Title" class="w-full px-3 py-2 placeholder-gray-500 border rounded-md mt-2">
+                                <textarea name="description" placeholder="Course Description" class="w-full px-3 py-2 placeholder-gray-500 border rounded-md mt-2"></textarea>
+                                <input type="text" name="banner" placeholder="Course Banner URL" class="w-full px-3 py-2 placeholder-gray-500 border rounded-md mt-2">
+                                <select name="visibility" class="w-full px-3 py-2 border rounded-md mt-2">
+                                    <option value="public">Public</option>
+                                    <option value="private">Private</option>
+                                </select>
+                                <select name="entry" class="w-full px-3 py-2 border rounded-md mt-2">
+                                    <option value="open">Open</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                                <div class="flex justify-between mt-2">
+                                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white font-bold rounded">Create</button>
+                                    <button type="button" class="px-4 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="open = false">
+                                        Close
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <h2 class="text-2xl font-bold mb-4">Enrolled classrooms</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" x-data="{ itemsStudent: []}" x-init="itemsStudent = (await fetch('/data/student')).json()">
+        <template x-for="item in itemsStudent" :key="item">
+          <%- include("../partials/classroomCard") %>
+        </template>
+        <p x-show="hook('itemsStudent', await itemsStudent)" class="text-center text-gray-500">No enrolled classrooms found.</p>
+      </div>
+
+      <h2 class="text-2xl font-bold mb-4 mt-8">Managed classrooms</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" x-data="{ itemsTeacher: []}" x-init="itemsTeacher = (await fetch('/data/teacher')).json()">
+        <template x-for="item in itemsTeacher" :key="item">
+          <%- include("../partials/classroomCard") %>
+        </template>
+        <p x-show="hook('itemsTeacher', await itemsTeacher)" class="text-center text-gray-500">No managed classrooms found.</p>
+      </div>
+      <h2 class="text-2xl font-bold mb-4 mt-8">Open to everyone</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" x-data="{ itemsOpen: [] }" x-init="itemsOpen = (await fetch('/data/open')).json()">
+        <template x-for="item in itemsOpen" :key="item">
+          <%- include("../partials/classroomCard") %>
+        </template>
+        <p x-show="hook('itemsOpen', await itemsOpen)" class="text-center text-gray-500">No open classrooms found.</p>      </div>
+    </main>
+    <script>
+      async function courseManagement() {
+        let isStudent = (await (await fetch("/identity")).json())["student"];
+        console.log(isStudent)
+        return {
+          open: false,
+          tab: 'join',
+          isStudent: (await (await fetch("/identity")).json())["student"]
+        }
+      }
+    </script>
+  </body>
+</html>

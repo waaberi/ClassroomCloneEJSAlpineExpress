@@ -5,14 +5,13 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const { createClient } = require("@libsql/client");
-const users_model = require("./models_sql/users");
 require("dotenv").config();
 
 // Création de l'application Express
 const app = express();
 
 // Configuration du moteur de vue
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "views/pages"));
 app.set("view engine", "ejs");
 
 // Utilisation des middlewares
@@ -41,14 +40,15 @@ if (process.env.NODE_ENV === "development") {
 const new_db = createClient(config);
 
 // Création du modèle utilisateur
-const user_table = new users_model(new_db);
-
+const user_table = new (require("./models_sql/mini_orm/users_new"))(new_db);
+const course_table = new (require("./models_sql/mini_orm/courses"))(new_db);
 // Migration de la base de données
-user_table.migrate();
+const table_migration = require("./models_sql/mini_orm/table_creation");
+table_migration(new_db);
 
 // Ajout de la base de données à l'objet requête
 app.use(function (req, res, next) {
-  req.db = { user_table };
+  req.db = { user_table, course_table };
   next();
 });
 
@@ -56,7 +56,7 @@ app.use(function (req, res, next) {
 app.use("/auth", require("./routes/auth"));
 app.use("/", require("./routes/index"));
 app.use("/dashboard", require("./routes/dashboard"));
-
+app.use("/identity", require("./routes/identity"));
 // Route pour UptimeRobot
 app.get("/uptimerobot", (req, res) => {
   console.log("received!");

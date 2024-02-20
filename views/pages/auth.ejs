@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Authentication Page</title>
-        <script src="/js/alpine.min.js" defer></script>
-        <script src="/js/tailwind.min.js"></script>
+        <%- include('../partials/head', { title: 'Authentication Page' }) %>
     </head>
     <body x-data="{ isSignin: false, message: '', error: false, isDragging: false, dropMessage: 'Drag and drop an image or click to select', file: 'empty' }" :class="{ 'bg-blue-100': isDragging, 'bg-gray-100': !isDragging }">
         <div class="flex items-center justify-center min-h-screen">
@@ -103,7 +99,7 @@
                         // Crée un nouvel objet FormData à partir du formulaire
                         const formData = new FormData(form);
                         // Si un fichier a été déposé, l'ajoute à l'objet FormData
-                        if (this.file) formData.append('profilePicture', this.file);
+                        if (this.file && !this.isSignin) formData.append('profilePicture', this.file);
                         try {
                             // Envoie une requête POST au serveur avec les données du formulaire
                             const response = await fetch(`/auth/${this.isSignin ? 'signin' : 'signup'}`, {

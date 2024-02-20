@@ -63,10 +63,20 @@ const data = [
   },
 ];
 
-// Route pour obtenir les données des cours
-router.get("/data", APIAuth, (req, res) => {
+
+router.get("/data/teacher", APIAuth, async (req, res) => { // classrooms the teacher is in
   // Retourne les données des cours en format JSON
   return res.json(data);
+});
+
+router.get("/data/student", APIAuth, async (req, res) => { // classrooms the student is in
+  // Retourne les données des cours en format JSON
+  return res.json(data);
+});
+
+router.get("/data/open", APIAuth, async (req, res) => { // classrooms anyone can see
+  // Retourne les données des cours en format JSON
+  return res.json([]);
 });
 
 // Route pour la page d'accueil
