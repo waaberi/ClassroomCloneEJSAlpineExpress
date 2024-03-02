@@ -1,6 +1,6 @@
-# [Projet serveur en Node.js](https://80b6c2c7-3953-4b71-a814-379e94ef7e8a-00-3h8m6p2p24prd.kirk.replit.dev/)
+# [Projet serveur en Node.js / Server Project in Node.js](https://classroom.waaberi.tech/)
 
-## [Lien repl.it](https://replit.com/@WaaberiIbrahim/ClassroomCloneEJSAlpineExpress)
+## [Lien repl.it / repl.it link](https://replit.com/@WaaberiIbrahim/ClassroomCloneEJSAlpineExpress)
 
 ## Explication des dossiers
 
